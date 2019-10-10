@@ -12,6 +12,7 @@ OpenAMP in realtime.
    - [1.2) Hardware Setup](#12-hardware-setup)
 - [2) Software](#2-software)
    - [2.1) Operating System](#21-operating-system)
+   - [2.2) Update Devicetree](#22-update-devicetree)
 - [3) Building and running](#3-building-and-running)
 - [4) Expected Output](#4-expected-output)
 
@@ -19,7 +20,8 @@ OpenAMP in realtime.
 
 ## 1.1 Hardware Requirements:
 
-1. [Avenger96](https://www.96boards.org/product/avenger96/)
+1. [Avenger96-v100](https://www.96boards.org/product/avenger96/)
+> Note: v200 board needs some modifications to the zephyr code for working
 2. [Power Supply](https://www.amazon.com/Adapter-Regulated-Supply-Copper-String/dp/B015G8DZK2)
 3. [Audio Mezzanine](https://www.96boards.org/product/audio-mezzanine/)
 4. [Grove IMU 10 DOF Sensor](http://wiki.seeedstudio.com/Grove-IMU_10DOF/)
@@ -28,6 +30,7 @@ OpenAMP in realtime.
 
 - Make sure the Avenger96 is powered off
 - Connect Audio Mezzanine on top of Avenger96
+- Set switch SW1 to ON position on the Audio Mezzanine
 - Connect IMU 10 DOF sensor to I2C_1 port of Audio Mezzanine
 - Connect HDMI display and USB keyboard to Avenger96
 
@@ -37,10 +40,29 @@ OpenAMP in realtime.
 
 # 2. Software
 
-## 2.1 Operating System:
+## 2.1 Operating System
 
 Install OpenSTLinux distribution on Avenger96 as per below wiki:
 https://wiki.dh-electronics.com/index.php/Avenger96
+
+## 2.2 Update Devicetree
+
+The Linux kernel devicetree needs to be updated for this demo. The I2C1
+port to be used by the M4 core needs it to be disabled for A7 core. So,
+the devicetree needs to be updated to disable the I2C1 port.
+
+This can be achieved using the [dtc](https://git.kernel.org/pub/scm/utils/dtc/dtc.git)
+utility as below:
+
+```shell
+$ cd /media/${USER}/bootfs
+$ dtc -I dtb -O dts stm32mp157a-av96.dtb > stm32mp157a-av96.dts
+```
+Now, disable the `i2c@40012000` node, with `status = "disabled"` property.
+
+```shell
+$ dtc -O dtb -o stm32mp157a-av96.dtb stm32mp157a-av96.dts
+```
 
 # 3. Building and running
 
